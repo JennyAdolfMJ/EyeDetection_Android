@@ -20,7 +20,14 @@
             android:name=".VideoActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_video"
+            android:theme="@style/FullscreenTheme" />
+        <activity
+            android:name=".DetectionActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_detection"
             android:theme="@style/FullscreenTheme"></activity>
     </application>
+
+    <uses-permission android:name="android.permission.CAMERA"/>
 
 </manifest>

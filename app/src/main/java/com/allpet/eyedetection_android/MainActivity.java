@@ -20,7 +20,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        // Set up the login form.
 
         mNameView = findViewById(R.id.dog_name);
         mThresholdView = findViewById(R.id.threshold);
@@ -44,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        Intent intent = new Intent(this, VideoActivity.class);
+        Intent intent = new Intent(this, DetectionActivity.class);
         startActivity(intent);
     }
     /**
