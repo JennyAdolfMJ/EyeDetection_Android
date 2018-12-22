@@ -1,3 +1,14 @@
 <resources>
-    <string name="app_name">EyeDetection_Android</string>
+    <string name="app_name">EyeDetection</string>
+    <string name="dog_name">Dog name</string>
+    <string name="threshold">Threshold</string>
+    <string name="eye">Eye</string>
+    <string name="left_eye">Left</string>
+    <string name="right_eye">Right</string>
+    <string name="start">Start</string>
+    <string name="error_field_required">This field is required</string>
+
+    <string name="title_activity_video">VideoActivity</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
 </resources>
