@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
     public void onStartClick(View view){
 
         String name = mNameView.getText().toString();
-        String threshold = mThresholdView.getText().toString();
+        int threshold = 0;
 
         if (name.isEmpty())
         {
@@ -36,7 +36,12 @@ public class MainActivity extends AppCompatActivity {
             mNameView.requestFocus();
             return;
         }
-        if (threshold.isEmpty())
+
+        try
+        {
+            threshold = Integer.parseInt(mThresholdView.getText().toString());
+        }
+        catch (NumberFormatException e)
         {
             mThresholdView.setError(getString(R.string.error_field_required));
             mThresholdView.requestFocus();
@@ -44,6 +49,9 @@ public class MainActivity extends AppCompatActivity {
         }
 
         Intent intent = new Intent(this, DetectionActivity.class);
+        intent.putExtra("name", name);
+        intent.putExtra("threshold", threshold);
+
         startActivity(intent);
     }
     /**

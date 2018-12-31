@@ -1,6 +1,9 @@
 package com.allpet.eyedetection_android;
 
+import android.Manifest;
 import android.content.Context;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.SurfaceView;
@@ -23,6 +26,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import static org.opencv.core.Core.mean;
+import static org.opencv.core.CvType.CV_16U;
+
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
@@ -34,7 +40,8 @@ public class DetectionActivity extends AppCompatActivity  implements CvCameraVie
     private CascadeClassifier mEyeCascade;
     private Mat mRgba;
     private Mat mGray;
-    private int absoluteFaceSize = 0;
+    private int absoluteEyeSize = 200;
+    private int mThreshold;
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -84,9 +91,17 @@ public class DetectionActivity extends AppCompatActivity  implements CvCameraVie
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detection);
 
-        mOpenCvCameraView = findViewById(R.id.cv_camera);
-        mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
-        mOpenCvCameraView.setCvCameraViewListener(this);
+        int hasWriteStoragePermission = ContextCompat.checkSelfPermission(getApplication(), Manifest.permission.CAMERA);
+        if (hasWriteStoragePermission == getPackageManager().PERMISSION_GRANTED) {
+            mOpenCvCameraView = findViewById(R.id.cv_camera);
+            mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
+            mOpenCvCameraView.setCvCameraViewListener(this);
+
+            mThreshold = getIntent().getIntExtra("threshold", 200);
+
+        } else {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, 0);
+        }
     }
 
     @Override
@@ -115,24 +130,32 @@ public class DetectionActivity extends AppCompatActivity  implements CvCameraVie
         mRgba = inputFrame.rgba(); //RGBA
         mGray = inputFrame.gray(); //单通道灰度图
 
-        if (absoluteFaceSize == 0) {
+        if (absoluteEyeSize == 0) {
             int height = mGray.rows();
             if (Math.round(height * 0.2f) > 0) {
-                absoluteFaceSize = Math.round(height * 0.2f);
+                absoluteEyeSize = Math.round(height * 0.2f);
             }
         }
 
         //检测并显示
-        MatOfRect faces = new MatOfRect();
+        MatOfRect eyes = new MatOfRect();
         if (mEyeCascade != null) {
-            mEyeCascade.detectMultiScale(mGray, faces, 1.1, 2, 2, new Size(absoluteFaceSize, absoluteFaceSize), new Size());
+            mEyeCascade.detectMultiScale(mGray, eyes, 1.1, 10, 2, new Size(absoluteEyeSize, absoluteEyeSize), new Size());
         }
-        Rect[] facesArray = faces.toArray();
+        Rect[] facesArray = eyes.toArray();
         if (facesArray.length > 0){
             for (int i = 0; i < facesArray.length; i++) {    //用框标记
-                Imgproc.rectangle(mRgba, facesArray[i].tl(), facesArray[i].br(), new Scalar(0, 255, 0, 255), 3);
+                Mat imageSobel = new Mat();
+                Imgproc.Laplacian(mGray.submat(facesArray[i]), imageSobel, CV_16U);
+
+                double meanValue = mean(imageSobel).val[0];
+
+                if (meanValue > mThreshold)
+                    Imgproc.rectangle(mRgba, facesArray[i].tl(), facesArray[i].br(), new Scalar(0, 0, 255, 255), 3);
+                else
+                    Imgproc.rectangle(mRgba, facesArray[i].tl(), facesArray[i].br(), new Scalar(0, 255, 0, 255), 3);
             }
         }
-        return mGray;
+        return mRgba;
     }
 }
